@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Introduction"
-author: "Student Name"
+author: "Anne Harshbarger"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -16,27 +16,28 @@ This exercise accompanies the introductory material in Environmental Data Analyt
 6. When you have completed the assignment, **Knit** the text and code into a single PDF file.
 8. After Knitting, submit the completed exercise (PDF file) to the dropbox in Sakai. Add your last name into the file name (e.g., "Salk_A03_Introduction.Rmd") prior to submission.
 
-The completed exercise is due on <>.
+The completed exercise is due on **January 26, 2021.**
 
 ## 1) Discussion Questions
 
 1. What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: I have no prior experience with Git, but some prior experience with R and data analytics. I have formal training through two previous courses: STA 101 (as an undergrad at Duke) and ENV 710 (last semester with Dr. Poulsen), both of which used R and RStudio for class assignments. Informally, I have used R for a handful of research projects, which primarily included building linear models and linear mixed models.
 
 2. Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: I feel confident about basic coding in R and very basic data wrangling.
 
 3. Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
+> Answer: Not exactly apprehensive, but I feel less confident about the modeling and analysis topics (including time series, spatial analysis, etc.) - but these are the skills I'm excited to learn! I am also a little less confident about being able to apply what we learn in class to datasets that may not be as neat or easy to work with as ones we use for examples.
 
 
 ## 2) GitHub
 
 Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository  and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/a-harshbarger/Environmental_Data_Analytics_2021
 
 
+**Duke Community Standard Affirmation:** I have adhered to the Duke Community Standard in completing this assignment. - Anne Harshbarger
