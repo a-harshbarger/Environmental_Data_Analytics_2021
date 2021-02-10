@@ -37,28 +37,28 @@ vector2
 vector3 <- c(TRUE,TRUE,TRUE,FALSE,TRUE,FALSE) #logical vector
 vector3
 
-vector1[3] # 
+vector1[3] # 3rd element in vector1 (5)
 
 # Matrices ----
-matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # 
+matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # matrix with 5 rows and 4 columns of integers 1-20
 matrix1
-matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) #
+matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) # matrix with same dimensions as above, populated across rows instead of down columns
 matrix2
 matrix3 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE, # return after comma continues the line
                   dimnames = list(c("uno", "dos", "tres", "cuatro", "cinco"), 
-                                  c("un", "deux", "trois", "cat"))) #
+                                  c("un", "deux", "trois", "cat"))) # names rows and columns of matrix
 
-matrix1[4, ] #
-matrix1[ , 3] #
-matrix1[c(12, 14)] #
-matrix1[c(12:14)] #
-matrix1[2:4, 1:3] #
+matrix1[4, ] # view 4th row of matrix1
+matrix1[ , 3] # view 3rd column of matrix1
+matrix1[c(12, 14)] # view 12th and 14th elements of matrix1
+matrix1[c(12:14)] # view 12th through 14th elements of matrix1
+matrix1[2:4, 1:3] # view section of matrix1 between rows 2-4 and columns 1-3
 
 cells <- c(1, 26, 24, 68)
 rnames <- c("R1", "R2")
 cnames <- c("C1", "C2") 
 matrix4 <- matrix(cells, nrow = 2, ncol = 2, byrow = TRUE,
-  dimnames = list(rnames, cnames)) # 
+  dimnames = list(rnames, cnames)) # create a matrix using values and names defined in previous 3 lines
 matrix4
 
 # Lists ---- 
@@ -66,14 +66,14 @@ list1 <- list(name = "Maria", mynumbers = vector1, mymatrix = matrix1, age = 5.3
 list1[[2]]
 
 # Data Frames ----
-d <- c(1, 2, 3, 4) # What type of vector?
-e <- c("red", "white", "red", NA) # What type of vector?
-f <- c(TRUE, TRUE, TRUE, FALSE) # What type of vector?
-dataframe1 <- data.frame(d,e,f) #
-names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) # 
+d <- c(1, 2, 3, 4) # numeric vector
+e <- c("red", "white", "red", NA) # character vector
+f <- c(TRUE, TRUE, TRUE, FALSE) # logical vector
+dataframe1 <- data.frame(d,e,f) # bind 3 vectors into df
+names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) # name columns and view df
 
-dataframe1[1:2,] # 
-dataframe1[c("ID","Passed")] # 
+dataframe1[1:2,] # view first 2 rows of df
+dataframe1[c("ID","Passed")] # select columns ID and passed
 dataframe1$ID
 
 ```
@@ -94,24 +94,45 @@ Find a ten-day forecast of temperatures (Fahrenheit) for Durham, North Carolina.
 
 ```{r}
 
+durham_high_f <- c(48,52,52,50,51,51,50,45,39,37)
+
+durham_low_f <- c(24,38,27,31,28,35,36,30,21,20)
+
 ```
 
 Now, create two additional vectors that include the ten-day forecast for the high and low temperatures in Celsius. Use a function to create the two new vectors from your existing ones in Fahrenheit.
 
 ```{r}
 
+convert.to.c <- function(temp.f)
+  
+{
+  step1 <- temp.f-30
+  step2 <- step1/2
+  return=step2
+  
+}
+
+durham_high_c <- convert.to.c(temp.f=durham_high_f); durham_high_c
+durham_low_c <- convert.to.c(temp.f=durham_low_f); durham_low_c
+
 ```
 
 Combine your four vectors into a data frame and add informative column names.
 
 ```{r}
+durham_forecast <- data.frame(durham_high_f, durham_high_c, durham_low_f, durham_low_c)
 
 ```
 
 Use the common functions `summary` and `sd` to obtain basic data summaries of the ten-day forecast. How would you call these functions differently for the entire data frame vs. a single column? Attempt to demonstrate both options below.
 
 ```{r}
+summary(durham_forecast)
+#sd(durham_forecast) #does not work for whole df
 
+summary(durham_forecast$durham_high_f)
+sd(durham_forecast$durham_high_f)
 ```
 
 ### Date objects
@@ -134,9 +155,9 @@ Remember formatting of dates in R:
 # (code must be uncommented)
 today <- Sys.Date()
 format(today, format = "%B")
-#format(today, format = "")
-#format(today, format = "")
-#format(today, format = "")
+format(today, format = "%y%m%d")
+format(today, format = "%Y%b")
+format(today, format = "%d %B %Y")
 
 ```
 
@@ -148,7 +169,7 @@ Install and load the package lubridate into your R session. Lubridate offers fas
 More info on lubridate [here][https://cran.r-project.org/web/packages/lubridate/lubridate.pdf].
 
 ```{r DateExercise1}
-#install.packages("lubridate")
+install.packages("lubridate")
 library(lubridate)
 
 #Ex1
