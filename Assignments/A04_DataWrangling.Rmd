@@ -1,6 +1,6 @@
 ---
 title: "Assignment 4: Data Wrangling"
-author: "Student Name"
+author: "Anne Harshbarger"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -25,8 +25,31 @@ The completed exercise is due on Tuesday, Feb 16 @ 11:59pm.
 
 ```{r, message = FALSE}
 #1
+getwd() #check working directory
+#install.packages("tidyverse", "lubridate") #install packages if needed
+library(tidyverse, lubridate) #load packages
+#Create 4 dataframes from raw csvs
+EPAair_O3_NC2018 <- read.csv("../Data/Raw/EPAair_O3_NC2018_raw.csv", 
+                             stringsAsFactors = TRUE)
+EPAair_O3_NC2019 <- read.csv("../Data/Raw/EPAair_O3_NC2019_raw.csv", 
+                             stringsAsFactors = TRUE)
+EPAair_PM25_NC2018 <- read.csv("../Data/Raw/EPAair_PM25_NC2018_raw.csv", 
+                             stringsAsFactors = TRUE)
+EPAair_PM25_NC2019 <- read.csv("../Data/Raw/EPAair_PM25_NC2019_raw.csv", 
+                             stringsAsFactors = TRUE)
+
 
 #2
+#Check dimensions, column names, and structure
+dim(EPAair_O3_NC2018); colnames(EPAair_O3_NC2018)
+str(EPAair_O3_NC2018, width=80, strict.width="cut")
+dim(EPAair_O3_NC2019); colnames(EPAair_O3_NC2019)
+str(EPAair_O3_NC2019, width=80, strict.width="cut")
+dim(EPAair_PM25_NC2018); colnames(EPAair_PM25_NC2018)
+str(EPAair_PM25_NC2018, width=80, strict.width="cut")
+dim(EPAair_PM25_NC2019); colnames(EPAair_PM25_NC2019)
+str(EPAair_PM25_NC2019, width=80, strict.width="cut")
+
 ```
 
 ## Wrangle individual datasets to create processed files.
@@ -37,13 +60,41 @@ The completed exercise is due on Tuesday, Feb 16 @ 11:59pm.
 
 ```{r}
 #3
+#Change date column to class date for all 4 dataframes
+EPAair_O3_NC2018$Date <- as.Date(EPAair_O3_NC2018$Date, format="%m/%d/%Y")
+EPAair_O3_NC2019$Date <- as.Date(EPAair_O3_NC2019$Date, format="%m/%d/%Y")
+EPAair_PM25_NC2018$Date <- as.Date(EPAair_PM25_NC2018$Date, format="%m/%d/%Y")
+EPAair_PM25_NC2019$Date <- as.Date(EPAair_PM25_NC2019$Date, format="%m/%d/%Y")
 
 #4
-
+#Select desired columns for all 4 dataframes
+EPAair_O3_NC2018 <- select(EPAair_O3_NC2018, Date, DAILY_AQI_VALUE, 
+                           Site.Name, AQS_PARAMETER_DESC, COUNTY, 
+                           SITE_LATITUDE, SITE_LONGITUDE)
+EPAair_O3_NC2019 <- select(EPAair_O3_NC2019, Date, DAILY_AQI_VALUE, 
+                           Site.Name, AQS_PARAMETER_DESC, COUNTY, 
+                           SITE_LATITUDE, SITE_LONGITUDE)
+EPAair_PM25_NC2018 <-select(EPAair_PM25_NC2018, Date, DAILY_AQI_VALUE, 
+                            Site.Name, AQS_PARAMETER_DESC, COUNTY, 
+                            SITE_LATITUDE, SITE_LONGITUDE)
+EPAair_PM25_NC2019 <- select(EPAair_PM25_NC2019, Date, DAILY_AQI_VALUE, 
+                             Site.Name, AQS_PARAMETER_DESC, COUNTY, 
+                             SITE_LATITUDE, SITE_LONGITUDE)
 #5
+#Replace parameter value with "PM2.5" for all cells
+EPAair_PM25_NC2018$AQS_PARAMETER_DESC <- "PM2.5"
+EPAair_PM25_NC2019$AQS_PARAMETER_DESC <- "PM2.5"
 
 #6
-
+#Create csvs for processed datasets
+write.csv(EPAair_O3_NC2018, row.names = FALSE, 
+          file = "../Data/Processed/EPAair_O3_NC2018_processed.csv")
+write.csv(EPAair_O3_NC2019, row.names = FALSE, 
+          file = "../Data/Processed/EPAair_O3_NC2019_processed.csv")
+write.csv(EPAair_PM25_NC2018, row.names = FALSE, 
+          file = "../Data/Processed/EPAair_PM25_NC2018_processed.csv")
+write.csv(EPAair_PM25_NC2019, row.names = FALSE, 
+          file = "../Data/Processed/EPAair_PM25_NC2019_processed.csv")
 ```
 
 
@@ -62,14 +113,53 @@ The completed exercise is due on Tuesday, Feb 16 @ 11:59pm.
 
 ```{r}
 #7
+#Create combined dataset
+EPAair_combined <- rbind(EPAair_O3_NC2018, EPAair_O3_NC2019, 
+                         EPAair_PM25_NC2018, EPAair_PM25_NC2019)
 
 #8
+#test intersect function
+# common_sites_O3 <- intersect(EPAair_O3_NC2018$Site.Name, EPAair_O3_NC2019$Site.Name)
+# common_sites_PM25 <- intersect(EPAair_PM25_NC2018$Site.Name, EPAair_PM25_NC2019$Site.Name)
+# common_sites_both <- intersect(common_sites_O3, common_sites_PM25)
+
+library(lubridate) #Load again to avoid error with knit output file
+
+EPAair_tidy <-
+  EPAair_combined %>%
+  filter(Site.Name == "Linville Falls" | #filter intersecting sites
+        Site.Name == "Durham Armory" | 
+        Site.Name == "Leggett" |
+        Site.Name == "Hattie Avenue" |
+        Site.Name == "Clemmons Middle" |
+        Site.Name == "Mendenhall School" | 
+        Site.Name == "Frying Pan Mountain" | 
+        Site.Name == "West Johnston Co." | 
+        Site.Name == "Garinger High School" | 
+        Site.Name == "Castle Hayne" | 
+        Site.Name == "Pitt Agri. Center" | 
+        Site.Name == "Bryson City" | 
+        Site.Name == "Millbrook School") %>%
+  group_by(Date, Site.Name, AQS_PARAMETER_DESC, COUNTY) %>% #Split-apply-combine
+  summarise(DAILY_AQI_VALUE = mean(DAILY_AQI_VALUE), 
+            SITE_LATITUDE = mean(SITE_LATITUDE), 
+            SITE_LONGITUDE = mean(SITE_LONGITUDE)) %>%
+  mutate(Month = month(Date)) %>% #create Month column
+  mutate(Year = year(Date)) #create Year column
 
 #9
+#Separate ozone and PM2.5 columns
+EPAair_tidy <- pivot_wider(EPAair_tidy, 
+                           names_from = AQS_PARAMETER_DESC, 
+                           values_from = DAILY_AQI_VALUE)
 
 #10
+dim(EPAair_tidy) #check dimensions
 
 #11
+#save combined processed dataset
+write.csv(EPAair_tidy, row.names = FALSE, 
+          file = "../Data/Processed/EPAair_O3_PM25_NC1718_Processed.csv")
 
 ```
 
@@ -81,13 +171,34 @@ The completed exercise is due on Tuesday, Feb 16 @ 11:59pm.
 
 ```{r}
 #12a
+EPAair_summary <-
+  EPAair_tidy %>%
+  group_by(Site.Name, Month, Year) %>% #create groups by site, month, year
+  summarise(meanAQI_O3 = mean(Ozone), 
+            meanAQI_PM25 = mean(PM2.5)) #calculate means
 
 #12b
+EPAair_summary2 <-
+  EPAair_summary %>%
+  drop_na(Month) %>%
+  drop_na(Year)
+
+#test effects of na.omit
+# EPAair_summary3 <-
+#   EPAair_summary %>%
+#   na.omit(Month) %>%
+#   na.omit(Year)
+
+#compare to drop_na without specifying columns
+#EPAair_summary4 <-
+#   EPAair_summary %>%
+#   drop_na() 
 
 #13
+  dim(EPAair_summary2) #check dimensions
 
 ```
 
 14. Why did we use the function `drop_na` rather than `na.omit`?
 
-> Answer: 
+> Answer: na.omit cannot operate on just one column at a time, but drop_na can. Although I attempted to specify the Month and Year columns with na.omit, na.omit removed rows with an NA in any column; the dimensions of the dataset after running the pipe with na.omit were the same as if I had used drop_na() with no columns specified (101 rows and 5 columns, as opposed to 308 rows and 5 columns with drop_na where columns Month and Year are specified). Meanwhile, drop_na would only have removed rows where the month or year was NA. The month and year were complete for all rows, so no rows were removed from the summary dataset.
