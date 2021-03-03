@@ -67,6 +67,8 @@ Are Ozone levels below the threshold for "good" AQI index (0-50)?
 > Exercise 1: State the hypotheses for testing mean of AQI index.
 
 > Answer: 
+H0: mu >= 50
+HA: mu < 50
 
 
 ```{r}
@@ -149,7 +151,20 @@ Create three plots, each with appropriately formatted axes and legends. Choose a
 
 ```{r}
 #Exercise 2:
+EPAair$Year <- as.factor(EPAair$Year)
+ozone_density <- ggplot(data = EPAair, aes(x = Ozone, fill = Year)) +
+  geom_density(alpha = 0.5)
+print(ozone_density)
 
+ozone_box <- ggplot(data = EPAair, aes(x = Year, y = Ozone)) +
+  geom_boxplot()
+print(ozone_box)
+
+ozone_violin <- ggplot(data = EPAair, aes(x = Year, y = Ozone)) +
+  geom_violin(draw_quantiles = 0.5)
+print(ozone_violin)
+
+#Add letters representing a significant difference between 2018 and 2019. 
 
 ```
 
@@ -163,10 +178,19 @@ For the NTL-LTER dataset, can we predict PM2.5 from Ozone?
 
 #Exercise 3: Run a linear regression PM2.5 by Ozone. Find the p-value and R-squared value. 
 
+lm_PM <- lm(data = EPAair, PM2.5 ~ Ozone)
+summary(lm_PM)
+
+#P < 2.2e-16
+#R2 0.1316
 
 
 #Exercise 4: Build a scatterplot. Add a line and standard error for the linear regression. Add the regression equation to the plot
 
+plot(lm_PM)
+
+# lm_scatter <- ggplot(data = EPAair, aes(x = Ozone, y = PM2.5)) +
+#   geom
 
 
 ```
@@ -180,7 +204,14 @@ What other variables can we add to improve model?
 
 #Exercise 5: Build correlation plots and identify more possible explanatory variables to add to the regression.
 
-
+library(corrplot)
+EPAair2 <- 
+  EPAair %>%
+  select(SITE_LATITUDE:PM2.5) %>%
+  na.omit()
+EPAcorr <- cor(EPAair2)
+corrplot(EPAcorr, method = "ellipse")
+corrplot.mixed(EPAcorr, upper = "ellipse")
 
 
 #Exercise 6: Choose a model by AIC in a Stepwise Algorithm. Do the results from AIC match the variables you selected on Exercise 5?
