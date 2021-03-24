@@ -71,7 +71,7 @@ Spatial data lends itself nicely to visualization, so let's examine a few ways t
 
 
 #Read the raw 2017 Ozone data
-EPAair_PM25_NC2018_raw <- read.csv("./Data/Raw/EPAair_PM25_NC2018_raw.csv")
+EPAair_PM25_NC2018_raw <- read.csv("../Data/Raw/EPAair_PM25_NC2018_raw.csv")
 
 #Reduce our data to just one record for each location, computing mean and max daily AQI values
 EPAair_PM_avg <- EPAair_PM25_NC2018_raw %>% 

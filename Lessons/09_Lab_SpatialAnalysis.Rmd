@@ -43,7 +43,7 @@ library(RColorBrewer)
 ## 2.1 Read tabular data and convert to spatial features
 ```{r convert.tabular.data.to.sf.object}
 #Read our EPA points into a spatial dataframe
-epa_pm25_sites_sf <- read_csv('./Data/Raw/EPAair_PM25_NC2018_raw.csv') %>% 
+epa_pm25_sites_sf <- read_csv('../Data/Raw/EPAair_PM25_NC2018_raw.csv') %>% 
   group_by(`Site Name`, COUNTY, SITE_LATITUDE, SITE_LONGITUDE) %>% 
   summarize(
     meanPM = mean(`Daily Mean PM2.5 Concentration`),
@@ -81,10 +81,10 @@ mapView(counties_sf, zcol = "AWATER")
 ```{r read HUCs shapefile}
 #Read the shapefile into an sf dataframe named "huc8_sf"
 
-
+huc8_sf <- st_read("../Data/Spatial/NCHUC8.shp")
 
 #View the data as a map, colored by the acreage in each
-
+mapview(huc8_sf)
 
 ```
 
@@ -95,9 +95,11 @@ mapView(counties_sf, zcol = "AWATER")
 ```{r Select the Upper Neuse HUC 8}
 #Read the shapefile into an sf dataframe
 
-
+huc8_sf_un <- st_read("../Data/Spatial/NCHUC8.shp") %>%
+  filter(SUBBASIN == "Upper Neuse")
 
 #Create a map
+mapview(huc8_sf) + mapview(huc8_sf_un, col.regions = "pink")
 
 
 ```
