@@ -4,6 +4,7 @@ author: Environmental Data Analytics | John Fay & Luana Lima | Developed by Kate
 date: "Spring 2021"
 output:
  pdf_document: default
+ chunk_output_type: console
 
 ---
 
@@ -43,6 +44,7 @@ Lastly, this [website](https://rmarkdown.rstudio.com) give a great & thorough ov
 
 ## THE KNITTING PROCESS
 -   The knitting sequence
+
     ![knitting](../lessons/img/rmarkdownflow.png)
 
 * Knitting commands in code chunks:
@@ -65,10 +67,33 @@ See: <https://rmarkdown.rstudio.com> and class recording.
 
 <Fill in our discussion below with bullet points. Use italics and bold for emphasis (hint: use the cheat sheets or `Help` →`Markdown Quick Reference` to figure out how to make bold and italic text).> 
 
+* Create clean documents with text accompanied by code and outputs, including figures, to **share with collaborators**
+* Include chunks from **other coding languages** (*if you have the kernels installed*)
+* Create **multiple types of documents** including PDFs, HTML, and presentations.
+* **Customize settings** for which code chunks are run and whether outputs and messages are displayed
+* **Navigate easily** by naming code chunks and defining sections
+* Using text editing, **track changes** easily through *version control*
+
+
+
 
 ## TEXT EDITING CHALLENGE
 
 Create a table below that details the example datasets we have been using in class. The first column should contain the names of the datasets and the second column should include some relevant information about the datasets. (Hint: use the cheat sheets to figure out how to make a table in Rmd)
+
+```{r}
+Title <- c("EPA Air NC (e.g. EPAair_O3_NC2018_raw.csv)", 
+           "NEON NIWO Litter (e.g. NEON_NIWO_Litter_trapdata_raw.csv)", 
+           "NTL LTER Lake (e.g. NTL-LTER_Lake_Nurtients_Raw.csv)", 
+           "NWIS Flow Data (e.g. NWIS_SiteFlowData_NE_RAW.csv)")
+Description <- c("Air quality data (O3 and PM2.5) for NC, USA", 
+                 "Leaf litter mass and functional group from Niwot Ridge sites", 
+                 "Lake depth, temperature, and nutrient data from North Temperate Lakes Long-Term Ecological Research project", 
+                 "Stream gage data from National Water Information System")
+dataset_info <- data.frame(Title, Description)
+knitr::kable(dataset_info, caption = "Table of dataset info")
+```
+
 
 
 ## R CHUNK EDITING CHALLENGE
@@ -77,12 +102,40 @@ Create a table below that details the example datasets we have been using in cla
 
 Create an R chunk below that installs the package `knitr`. Instead of commenting out the code, customize the chunk options such that the code is not evaluated (i.e., not run).
 
+```{r eval=FALSE, include=TRUE}
+install.packages("knitr")
+```
+
 
 ### Setup
 
 Create an R chunk below called "setup" that checks your working directory, loads the packages `tidyverse`, `lubridate`, and `knitr`, and sets a ggplot theme. Remember that you need to disable R throwing a message, which contains a check mark that cannot be knitted.
 
+```{r setup, message = FALSE}
+getwd()
+library(tidyverse)
+library(lubridate)
+library(knitr)
+library(viridis)
+
+mytheme <- theme_bw() + theme(
+  text = element_text(color = "black", size = 12),
+  axis.text = element_text(color = "black", size = 12),
+  legend.position = "top",
+  axis.line = element_line(color = "dark gray", size = 1.25))
+theme_set(mytheme)
+```
+
+
 Load the NTL-LTER_Lake_Nutrients_Raw dataset, display the head of the dataset, and set the date column to a date format.
+
+```{r include=FALSE}
+lakedata <- read.csv("../Data/Raw/NTL-LTER_Lake_Nutrients_Raw.csv")
+head(lakedata)
+lakedata$sampledate <- as.Date(lakedata$sampledate, format = "%m/%d/%y")
+
+```
+
 
 Customize the chunk options such that the code is run but is not displayed in the final document.
 
@@ -95,17 +148,103 @@ Create an R chunk below to create a processed dataset do the following operation
 -   Include only surface samples (depth = 0 m)
 -   Drop rows with missing data
 
+```{r}
+lakedata_processed <- lakedata %>%
+    select(!lakeid, !depth_id, !comments) %>%
+    filter(depth == "0") %>%
+    drop_na()
+```
+
+
 Create a second R chunk to create a summary dataset with the mean, minimum, maximum, and standard deviation of total nitrogen concentrations for each lake. Create a second summary dataset that is identical except that it evaluates total phosphorus. Customize the chunk options such that the code is run but not displayed in the final document.
+
+```{r include=FALSE}
+lakedata_summary_tn <- lakedata_processed %>%
+  select(lakename, tn_ug) %>%
+  group_by(lakename) %>%
+  summarise(mean_tn = mean(tn_ug),
+            min_tn = min(tn_ug),
+            max_tn = max(tn_ug),
+            sd_tn = sd(tn_ug))
+
+lakedata_summary_tp <- lakedata_processed %>%
+  select(lakename, tp_ug) %>%
+  group_by(lakename) %>%
+  summarise(mean_tn = mean(tp_ug),
+            min_tn = min(tp_ug),
+            max_tn = max(tp_ug),
+            sd_tn = sd(tp_ug))
+
+```
+
+
 
 Create a third R chunk that uses the function `kable` in the knitr package to display two tables: one for the summary dataframe for total N and one for the summary dataframe of total P. Use the `caption = " "` code within that function to title your tables. Customize the chunk options such that the final table is displayed but not the code used to generate the table.
 
+```{r echo=FALSE}
+knitr::kable(lakedata_summary_tn, 
+             caption = "Summary of total nitrogen (ug) by lake",
+             col.names = c("Lake Name",
+                           "Mean total N",
+                           "Minimum total N",
+                           "Maximum total N",
+                           "Standard deviation total N"))
+                        
+knitr::kable(lakedata_summary_tp, 
+             caption = "Summary of total phosphorus (ug) by lake",
+             col.names = c("Lake Name",
+                           "Mean total P",
+                           "Minimum total P",
+                           "Maximum total P",
+                           "Standard deviation total P"))
+```
+
+
 Create a fourth and fifth R chunk that generates two plots (one in each chunk): one for total N over time with different colors for each lake, and one with the same setup but for total P. Decide which geom option will be appropriate for your purpose, and select a color palette that is visually pleasing and accessible. Customize the chunk options such that the final figures are displayed but not the code used to generate the figures. In addition, customize the chunk options such that the figures are aligned on the left side of the page. Lastly, add a fig.cap chunk option to add a caption (title) to your plot that will display underneath the figure.
+
+```{r echo=FALSE, fig.cap="Total nitrogen by lake for NTL LTER lakes from 1991-1999", fig.align = "left", fig.show = "asis"}
+
+lake_n_plot <- ggplot(lakedata_processed, aes(x = sampledate, y = tn_ug, 
+                                              color = lakename)) +
+  geom_line(size = 1) + 
+  scale_x_date(breaks = "6 months")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(x = "Date", y = "Total Nitrogen (ug)", color = "Lake Name")
+lake_n_plot
+```
+
+
+```{r, fig.cap = "Total phosphorus by lake for NTL LTER lakes from 1991-1999", echo = FALSE, fig.align = "left", fig.show = "asis"}
+
+lake_p_plot <- ggplot(lakedata_processed, aes(x = sampledate, y = tp_ug, 
+                                              color = lakename)) +
+  geom_line(size = 1) +
+  scale_x_date(breaks = "6 months")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(x = "Date", y = "Total Phosphorus (ug)", color = "Lake Name")
+lake_p_plot
+```
+
+
 
 
 ### Communicating results
 
 Write a paragraph describing your findings from the R coding challenge above. This should be geared toward an educated audience but one that is not necessarily familiar with the dataset. Then insert a horizontal rule below the paragraph. Below the horizontal rule, write another paragraph describing the next steps you might take in analyzing this dataset. What questions might you be able to answer, and what analyses would you conduct to answer those questions?
 
+
+On average, Hummingbird Lake has the highest nutrient levels (both nitrogen and phosphorus; Tables 2 and 3 respectively) of any lake in the Northern Temperate Lakes Long-Term Ecological Research program, with an average of 1036.67 ug of nitrogen and 36.22 ug of phosphorus recorded at the surface. Meanwhile, Crampton Lake has the lowest average level of total nitrogen (362.68 ug) and Paul Lake has the lowest average level of phosphorus (10.46 ug). Nitrogen levels were most variable in West Long Lake (range = 2567.13, sd = 402.96) and phosphorus levels were most variable in East Long Lake (range = 93.05, sd = 17.38). The levels of total nitrogen (Figure 1) and total phosphorus (Figure 2) in the lakes of the NTL-LTER fluctuate over time. Each year, nutrients are relatively low at the beginning of summer (late May to early June) and higher at the end of summer (late July to early August). In Peter Lake and East, Central, and West Long Lake, the level of both nitrogen and phosphorus appears to increase over time. In general, it appears that the level of nitrogen and phosphorus are correlated; peaks in nitrogen level usually correspond to peaks in phosphorus level.
+
+***
+
+
+To better understand patterns in nutrient levels in the LTER lakes, I would begin by investigating whether the nitrogen and phosphorus levels are significantly different in different lakes. I could answer this question with a one-way analysis of variance (ANOVA) for total nitrogen and another for total phosphorus to compare nutrient levels among lakes. If the ANOVA returns a signifcant result, I will follow up with Tukey's HSD pairwise comparisons to see which lakes have significantly different nutrient levels from the others. Next, I would use a time series analysis to investigate whether there is a seasonal trend in nutrient levels and a trend across years, as the two figures suggest. Two challenges to conducting a time series analysis would be 1. the period of data collection, as data on lake nutrient levels is only collected during the summer; and 2. the temporal coverage is not equal for all lakes - for example, Hummingbird Lake only has data recorded in 1999. If the time series analysis is not a good fit for the data, I could also attempt to answer this question using a linear regression with month and/or year as explanatory variables and nutrient level as the response variable.
+
+
+
+**Duke Community Standard affirmation:** I have adhered to the Duke Community Standard in completing this assignment. -Anne Harshbarger
 
 ## KNIT YOUR PDF
 When you have completed the above steps, try knitting your PDF to see if all of the formatting options you specified turned out as planned. This may take some troubleshooting.
